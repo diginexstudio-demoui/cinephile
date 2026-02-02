@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinephile App - By Richard Production</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        
+        :root {
+            --primary: #facc15;
+            --secondary: #6366f1;
+            --accent: #f43f5e;
+            --bg: #020617;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        .glass {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .neon-border {
+            box-shadow: 0 0 15px rgba(250, 204, 21, 0.2);
+            border: 1px solid rgba(250, 204, 21, 0.4);
+        }
+
+        .gold-gradient {
+            background: linear-gradient(135deg, #facc15 0%, #eab308 100%);
+        }
+
+        .animate-pop {
+            animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate-shake {
+            animation: shake 0.4s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            50% { transform: translateX(8px); }
+            75% { transform: translateX(-8px); }
+        }
+
+        .progress-fill {
+            transition: width 0.5s ease-out;
+        }
+
+        /* Card Hover Effects */
+        .game-card:active {
+            transform: scale(0.95);
+        }
+
+        ::-webkit-scrollbar { width: 0px; }
+    </style>
+</head>
+<body class="min-h-screen pb-24">
+
+<!-- Splash Screen -->
+<div id="splash" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#020617] transition-opacity duration-700">
+    
+    <h1 class="text-5xl font-black tracking-widest text-yellow-400 mb-3 animate-[pop_0.6s_ease-out]">
+        CINEPHILE
+    </h1>
+
+    <p class="text-sm tracking-wider text-white opacity-80 mb-8">
+        by Richard Production
+    </p>
+
+    <!-- Progress Bar -->
+    <div class="w-56 h-2 bg-slate-800 rounded-full overflow-hidden">
+        <div id="splash-progress" class="h-full bg-yellow-400 transition-all duration-300" style="width: 0%"></div>
+    </div>
+
+    <span id="splash-text" class="mt-4 text-xs text-slate-400 tracking-widest">
+        LOADING 0%
+    </span>
+</div>
+
+    <!-- Global App State Display -->
+    <div id="app" class="max-w-md mx-auto px-4 pt-6">
+        
+        <!-- Premium Header -->
+        <header class="flex justify-between items-center mb-6 glass p-4 rounded-3xl neon-border relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1 h-full gold-gradient"></div>
+            <div class="flex items-center gap-4">
+                <div id="user-avatar" class="w-14 h-14 gold-gradient rounded-2xl flex items-center justify-center text-slate-900 text-2xl shadow-lg shadow-yellow-500/20">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div>
+                    <h2 id="display-name" class="font-extrabold text-lg leading-tight">Cinephile</h2>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="text-[10px] bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-tighter">Level <span id="user-level">1</span></span>
+                        <div class="w-20 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                            <div id="level-progress" class="progress-fill h-full gold-gradient" style="width: 30%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col items-end">
+                <div class="flex items-center gap-2 bg-slate-800/50 px-3 py-1 rounded-full border border-white/5">
+                    <i class="fas fa-coins text-yellow-400 text-xs"></i>
+                    <span id="user-points" class="font-black text-yellow-400 text-sm">0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Content -->
+        <main id="main-content" class="animate-pop">
+            <!-- Injected by JS -->
+        </main>
+
+        <!-- Floating Navigation -->
+        <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md glass border border-white/10 rounded-3xl p-3 flex justify-around items-center z-50 shadow-2xl">
+            <button onclick="router.navigate('home')" class="nav-item group flex flex-col items-center gap-1" data-page="home">
+                <div class="p-2 rounded-xl group-hover:bg-yellow-500/10 transition-colors">
+                    <i class="fas fa-house-chimney text-xl"></i>
+                </div>
+                <span class="text-[9px] font-bold uppercase opacity-50">Home</span>
+            </button>
+            <button onclick="router.navigate('games')" class="nav-item group flex flex-col items-center gap-1" data-page="games">
+                <div class="p-2 rounded-xl group-hover:bg-yellow-500/10 transition-colors">
+                    <i class="fas fa-clapperboard text-xl"></i>
+                </div>
+                <span class="text-[9px] font-bold uppercase opacity-50">Play</span>
+            </button>
+            <button onclick="router.navigate('shop')" class="nav-item group flex flex-col items-center gap-1" data-page="shop">
+                <div class="p-2 rounded-xl group-hover:bg-yellow-500/10 transition-colors">
+                    <i class="fas fa-gem text-xl"></i>
+                </div>
+                <span class="text-[9px] font-bold uppercase opacity-50">Shop</span>
+            </button>
+            <button onclick="router.navigate('settings')" class="nav-item group flex flex-col items-center gap-1" data-page="settings">
+                <div class="p-2 rounded-xl group-hover:bg-yellow-500/10 transition-colors">
+                    <i class="fas fa-user-ninja text-xl"></i>
+                </div>
+                <span class="text-[9px] font-bold uppercase opacity-50">Rank</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Fancy Toast -->
+    <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl shadow-2xl transition-all duration-500 transform -translate-y-32 opacity-0 pointer-events-none flex items-center gap-3">
+        <div id="toast-icon" class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center"></div>
+        <span id="toast-msg" class="font-bold"></span>
+    </div>
+
+    <script>
+        // --- Game Database ---
+        const GAME_DB = {
+            quiz: [
+                { q: "Sutradara 'Oppenheimer' & 'Inception'?", a: ["Christopher Nolan", "Denis Villeneuve", "James Cameron", "Spielberg"], c: 0 },
+                { q: "Film animasi pertama yang masuk nominasi Best Picture?", a: ["Toy Story", "Beauty and the Beast", "The Lion King", "Shrek"], c: 1 },
+                { q: "Berapa jumlah Infinity Stones di MCU?", a: ["4", "5", "6", "7"], c: 2 },
+                { q: "Siapa pemeran 'The Joker' di film The Dark Knight?", a: ["Joaquin Phoenix", "Heath Ledger", "Jack Nicholson", "Jared Leto"], c: 1 },
+                { q: "Negara asal film 'Parasite'?", a: ["Jepang", "Tiongkok", "Korea Selatan", "Thailand"], c: 2 }
+            ],
+            emoji: [
+                { emoji: "🤡🎈🏘️", answer: "IT", hint: "Badut menyeramkan dari Stephen King" },
+                { emoji: "🦁👑🏜️", answer: "LION KING", hint: "Hakuna Matata" },
+                { emoji: "🚢❄️💔", answer: "TITANIC", hint: "Jack & Rose" },
+                { emoji: "🕷️🕸️🏙️", answer: "SPIDERMAN", hint: "Tetangga ramah" },
+                { emoji: "🦖🏞️🚙", answer: "JURASSIC PARK", hint: "Taman Dinosaurus" },
+                { emoji: "🍫🏭🏭", answer: "WILLY WONKA", hint: "Pabrik cokelat ajaib" }
+            ],
+            scramble: [
+                { word: "AVATAR", hint: "Makhluk biru di Pandora" },
+                { word: "GLADIATOR", hint: "Petarung di arena Romawi" },
+                { word: "BATMAN", hint: "Ksatria kegelapan Gotham" },
+                { word: "DUNE", hint: "Planet gurun pasir" }
+            ]
+        };
+
+        // --- State ---
+        let state = {
+            user: {
+                name: "Cinephile #1",
+                points: 0,
+                level: 1,
+                xp: 0,
+                avatar: "fas fa-user",
+                inventory: ["default"],
+                lastDaily: 0
+            }
+        };
+
+        // --- Storage ---
+        const storage = {
+            save: () => {
+                localStorage.setItem('cinequest_v2_data', JSON.stringify(state.user));
+            },
+            load: () => {
+                const data = localStorage.getItem('cinequest_v2_data');
+                if (data) state.user = JSON.parse(data);
+                updateGlobalUI();
+            }
+        };
+
+        const updateGlobalUI = () => {
+            document.getElementById('user-points').innerText = state.user.points.toLocaleString();
+            document.getElementById('user-level').innerText = state.user.level;
+            document.getElementById('display-name').innerText = state.user.name;
+            document.getElementById('user-avatar').innerHTML = `<i class="${state.user.avatar}"></i>`;
+            
+            // Level progress (XP per level is level * 200)
+            const targetXp = state.user.level * 200;
+            const progress = (state.user.xp / targetXp) * 100;
+            document.getElementById('level-progress').style.width = `${Math.min(progress, 100)}%`;
+
+            if(state.user.xp >= targetXp) {
+                state.user.level++;
+                state.user.xp = 0;
+                storage.save();
+                showToast("LEVEL UP! Kamu sekarang Level " + state.user.level, "level");
+                updateGlobalUI();
+            }
+        };
+
+        const showToast = (msg, type = 'success') => {
+            const toast = document.getElementById('toast');
+            const msgEl = document.getElementById('toast-msg');
+            const iconEl = document.getElementById('toast-icon');
+            
+            toast.className = `fixed top-8 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl shadow-2xl transition-all duration-500 transform flex items-center gap-3`;
+            
+            if(type === 'success') {
+                toast.classList.add('bg-emerald-600', 'text-white');
+                iconEl.innerHTML = '<i class="fas fa-check"></i>';
+            } else if(type === 'error') {
+                toast.classList.add('bg-rose-600', 'text-white');
+                iconEl.innerHTML = '<i class="fas fa-times"></i>';
+            } else {
+                toast.classList.add('gold-gradient', 'text-slate-900');
+                iconEl.innerHTML = '<i class="fas fa-star"></i>';
+            }
+
+            msgEl.innerText = msg;
+            toast.classList.remove('-translate-y-32', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('-translate-y-32', 'opacity-0');
+            }, 3000);
+        };
+
+        // --- Router ---
+        const router = {
+            navigate: (page) => {
+                const main = document.getElementById('main-content');
+                
+                // Active Nav Styling
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    const icon = item.querySelector('i');
+                    const span = item.querySelector('span');
+                    if(item.dataset.page === page) {
+                        icon.className = icon.className.replace('text-xl', 'text-2xl text-yellow-400');
+                        span.classList.remove('opacity-50');
+                        span.classList.add('text-yellow-400', 'opacity-100');
+                    } else {
+                        icon.className = icon.className.replace('text-2xl text-yellow-400', 'text-xl');
+                        span.classList.add('opacity-50');
+                        span.classList.remove('text-yellow-400', 'opacity-100');
+                    }
+                });
+
+                switch(page) {
+                    case 'home': renderHome(); break;
+                    case 'games': renderGamesMenu(); break;
+                    case 'shop': renderShop(); break;
+                    case 'settings': renderSettings(); break;
+                    case 'game-quiz': startQuiz(); break;
+                    case 'game-emoji': startEmoji(); break;
+                    case 'game-scramble': startScramble(); break;
+                }
+            }
+        };
+
+        // --- Page Renders ---
+
+        function renderHome() {
+            const now = Date.now();
+            const oneDay = 24 * 60 * 60 * 1000;
+            const canClaim = now - state.user.lastDaily > oneDay;
+
+            document.getElementById('main-content').innerHTML = `
+                <div class="animate-pop space-y-6">
+                    <!-- Daily Bonus Section -->
+                    <div class="glass p-6 rounded-[2rem] relative overflow-hidden">
+                        <div class="flex justify-between items-center relative z-10">
+                            <div>
+                                <h3 class="text-xl font-black italic">BONUS HARIAN</h3>
+                                <p class="text-xs text-slate-400">Klaim koin gratis tiap 24 jam!</p>
+                            </div>
+                            <button onclick="claimDaily()" ${!canClaim ? 'disabled' : ''} class="px-6 py-3 rounded-2xl font-black text-sm transition-all ${canClaim ? 'gold-gradient text-slate-900 shadow-lg shadow-yellow-500/40 active:scale-95' : 'bg-slate-800 text-slate-500 cursor-not-allowed'}">
+                                ${canClaim ? 'KLAIM +100' : 'TERKLAIM'}
+                            </button>
+                        </div>
+                        <div class="absolute -right-4 -bottom-4 opacity-10 text-8xl rotate-12"><i class="fas fa-gift"></i></div>
+                    </div>
+
+                    <!-- Hero Stats -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="glass p-5 rounded-3xl border-b-4 border-indigo-500">
+                            <i class="fas fa-bolt text-indigo-400 mb-2"></i>
+                            <p class="text-[10px] uppercase font-black text-slate-500">Koleksi Item</p>
+                            <p class="text-2xl font-black">${state.user.inventory.length}</p>
+                        </div>
+                        <div class="glass p-5 rounded-3xl border-b-4 border-emerald-500">
+                            <i class="fas fa-trophy text-emerald-400 mb-2"></i>
+                            <p class="text-[10px] uppercase font-black text-slate-500">Level Rank</p>
+                            <p class="text-2xl font-black">${state.user.level >= 10 ? 'Elite' : 'Rookie'}</p>
+                        </div>
+                    </div>
+
+                    <!-- Featured Action -->
+                    <div onclick="router.navigate('game-emoji')" class="relative glass rounded-[2rem] p-8 overflow-hidden cursor-pointer group active:scale-95 transition-all">
+                        <div class="relative z-10">
+                            <span class="bg-rose-500 text-[10px] font-black px-3 py-1 rounded-full uppercase mb-4 inline-block">Trending Game</span>
+                            <h2 class="text-3xl font-black leading-tight mb-2">TEBAK FILM <br>VIA EMOJI 🧩</h2>
+                            <p class="text-slate-400 text-sm">Gunakan imajinasimu untuk <br>menebak judul film.</p>
+                        </div>
+                        <div class="absolute right-[-20px] bottom-[-20px] text-[150px] opacity-10 group-hover:rotate-12 transition-transform duration-500">🎬</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderGamesMenu() {
+            document.getElementById('main-content').innerHTML = `
+                <div class="animate-pop space-y-4">
+                    <h2 class="text-2xl font-black mb-6 flex items-center gap-3">
+                        <i class="fas fa-gamepad text-yellow-400"></i> Arcade Center
+                    </h2>
+
+                    <div onclick="router.navigate('game-quiz')" class="game-card glass p-6 rounded-[2rem] flex items-center gap-5 border-r-4 border-yellow-500 cursor-pointer hover:bg-slate-800/50 transition-all">
+                        <div class="w-16 h-16 rounded-2xl bg-yellow-500/10 flex items-center justify-center text-3xl text-yellow-400"><i class="fas fa-brain"></i></div>
+                        <div>
+                            <h3 class="font-black text-lg">Movie Trivia Quiz</h3>
+                            <p class="text-xs text-slate-400">Uji wawasan luasmu di sini.</p>
+                            <div class="mt-2 text-[10px] font-bold text-yellow-500"><i class="fas fa-plus"></i> 100 XP / Game</div>
+                        </div>
+                    </div>
+
+                    <div onclick="router.navigate('game-emoji')" class="game-card glass p-6 rounded-[2rem] flex items-center gap-5 border-r-4 border-rose-500 cursor-pointer hover:bg-slate-800/50 transition-all">
+                        <div class="w-16 h-16 rounded-2xl bg-rose-500/10 flex items-center justify-center text-3xl text-rose-400">🧩</div>
+                        <div>
+                            <h3 class="font-black text-lg">Emoji Movie Master</h3>
+                            <p class="text-xs text-slate-400">Tebak film dari susunan emoji.</p>
+                            <div class="mt-2 text-[10px] font-bold text-rose-500"><i class="fas fa-plus"></i> 150 XP / Game</div>
+                        </div>
+                    </div>
+
+                    <div onclick="router.navigate('game-scramble')" class="game-card glass p-6 rounded-[2rem] flex items-center gap-5 border-r-4 border-indigo-500 cursor-pointer hover:bg-slate-800/50 transition-all">
+                        <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-3xl text-indigo-400"><i class="fas fa-font"></i></div>
+                        <div>
+                            <h3 class="font-black text-lg">Word Scramble</h3>
+                            <p class="text-xs text-slate-400">Susun huruf judul film acak.</p>
+                            <div class="mt-2 text-[10px] font-bold text-indigo-500"><i class="fas fa-plus"></i> 50 XP / Game</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- Shop Logic ---
+        const ITEMS = [
+            { id: 'v-1', name: 'Vip Star', price: 200, icon: 'fas fa-star', color: 'text-yellow-400' },
+            { id: 'v-2', name: 'Cyber Neon', price: 500, icon: 'fas fa-bolt', color: 'text-blue-400' },
+            { id: 'v-3', name: 'Hot Fire', price: 1000, icon: 'fas fa-fire', color: 'text-orange-500' },
+            { id: 'v-4', name: 'King Crown', price: 2500, icon: 'fas fa-crown', color: 'text-yellow-600' },
+            { id: 'v-5', name: 'The Dragon', price: 5000, icon: 'fas fa-dragon', color: 'text-rose-500' }
+        ];
+
+        function renderShop() {
+            let listHTML = '';
+            ITEMS.forEach(item => {
+                const owned = state.user.inventory.includes(item.id);
+                listHTML += `
+                    <div class="glass p-5 rounded-3xl flex flex-col items-center text-center">
+                        <div class="w-14 h-14 bg-slate-800 rounded-2xl flex items-center justify-center text-2xl ${item.color} mb-3">
+                            <i class="${item.icon}"></i>
+                        </div>
+                        <h4 class="font-black text-xs uppercase mb-1">${item.name}</h4>
+                        <p class="text-yellow-400 font-bold text-xs mb-4"><i class="fas fa-coins"></i> ${item.price}</p>
+                        <button onclick="buyItem('${item.id}', ${item.price})" ${owned ? 'disabled' : ''} class="w-full py-2 rounded-xl text-[10px] font-black uppercase transition-all ${owned ? 'bg-slate-700 text-slate-500' : 'bg-white text-slate-900 hover:bg-yellow-400'}">
+                            ${owned ? 'Dimiliki' : 'Beli'}
+                        </button>
+                    </div>
+                `;
+            });
+
+            document.getElementById('main-content').innerHTML = `
+                <div class="animate-pop">
+                    <h2 class="text-2xl font-black mb-6">Premium Shop</h2>
+                    <div class="grid grid-cols-2 gap-4">${listHTML}</div>
+                </div>
+            `;
+        }
+
+        function buyItem(id, price) {
+            if(state.user.points >= price) {
+                state.user.points -= price;
+                state.user.inventory.push(id);
+                storage.save();
+                updateGlobalUI();
+                showToast("Item Berhasil Dibeli!", "success");
+                renderShop();
+            } else {
+                showToast("Koin Tidak Cukup!", "error");
+            }
+        }
+
+        // --- Settings / Rank ---
+        function renderSettings() {
+            let inventoryHTML = '';
+            ITEMS.forEach(item => {
+                if(state.user.inventory.includes(item.id)) {
+                    inventoryHTML += `
+                        <button onclick="setAvatar('${item.icon}')" class="w-12 h-12 rounded-xl bg-slate-800 border-2 ${state.user.avatar === item.icon ? 'border-yellow-500' : 'border-transparent'} flex items-center justify-center">
+                            <i class="${item.icon} ${item.color}"></i>
+                        </button>
+                    `;
+                }
+            });
+
+            document.getElementById('main-content').innerHTML = `
+                <div class="animate-pop space-y-6">
+                    <div class="glass p-6 rounded-[2rem] text-center">
+                        <div class="w-24 h-24 gold-gradient mx-auto rounded-3xl flex items-center justify-center text-4xl text-slate-900 shadow-xl mb-4">
+                            <i class="${state.user.avatar}"></i>
+                        </div>
+                        <input id="new-name" type="text" value="${state.user.name}" class="bg-slate-800 text-center font-black text-xl w-full py-2 rounded-xl focus:outline-none focus:ring-2 ring-yellow-500 mb-4">
+                        <button onclick="updateName()" class="px-6 py-2 bg-slate-700 rounded-full text-xs font-bold">Update Profil</button>
+                    </div>
+
+                    <div class="glass p-6 rounded-[2rem]">
+                        <h3 class="font-black text-sm uppercase mb-4 text-slate-400 tracking-widest text-center">Koleksi Avatar</h3>
+                        <div class="flex flex-wrap justify-center gap-3">
+                            <button onclick="setAvatar('fas fa-user')" class="w-12 h-12 rounded-xl bg-slate-800 border-2 ${state.user.avatar === 'fas fa-user' ? 'border-yellow-500' : 'border-transparent'} flex items-center justify-center"><i class="fas fa-user"></i></button>
+                            ${inventoryHTML}
+                        </div>
+                    </div>
+
+                    <button onclick="resetApp()" class="w-full py-4 text-rose-500 font-bold opacity-50 hover:opacity-100 transition-opacity">Reset Seluruh Progres</button>
+                </div>
+            `;
+        }
+
+        function updateName() {
+            const val = document.getElementById('new-name').value;
+            if(val.trim()) {
+                state.user.name = val;
+                storage.save();
+                updateGlobalUI();
+                showToast("Profil Disimpan");
+            }
+        }
+
+        function setAvatar(icon) {
+            state.user.avatar = icon;
+            storage.save();
+            updateGlobalUI();
+            renderSettings();
+            showToast("Avatar Diganti");
+        }
+
+        function resetApp() {
+            if(confirm("Hapus semua data?")) {
+                localStorage.removeItem('cinequest_v2_data');
+                location.reload();
+            }
+        }
+
+        function claimDaily() {
+            state.user.points += 100;
+            state.user.lastDaily = Date.now();
+            storage.save();
+            updateGlobalUI();
+            renderHome();
+            showToast("Bonus +100 Koin Diklaim!", "success");
+        }
+
+        // --- GAME: EMOJI MASTER ---
+        let currentEmojiIndex = 0;
+        function startEmoji() {
+            currentEmojiIndex = 0;
+            renderEmojiGame();
+        }
+
+        function renderEmojiGame() {
+            const game = GAME_DB.emoji[currentEmojiIndex];
+            document.getElementById('main-content').innerHTML = `
+                <div class="animate-pop text-center">
+                    <div class="flex justify-between items-center mb-8">
+                        <button onclick="router.navigate('games')" class="text-slate-500 hover:text-white"><i class="fas fa-arrow-left"></i></button>
+                        <span class="bg-rose-500/20 text-rose-400 px-4 py-1 rounded-full text-[10px] font-black uppercase">Level ${currentEmojiIndex + 1}</span>
+                    </div>
+
+                    <div class="glass py-12 px-4 rounded-[3rem] mb-8 relative">
+                        <div class="text-7xl mb-6 drop-shadow-lg">${game.emoji}</div>
+                        <p class="text-slate-400 text-sm italic">" ${game.hint} "</p>
+                        <div class="absolute -top-4 -right-4 w-12 h-12 gold-gradient rounded-full flex items-center justify-center text-slate-900 font-black text-xl shadow-lg animate-bounce">?</div>
+                    </div>
+
+                    <input id="emoji-ans" type="text" placeholder="KETIK JUDUL FILM..." class="w-full bg-slate-800 border-2 border-slate-700 p-5 rounded-3xl text-center font-black text-xl mb-4 focus:border-rose-500 focus:outline-none uppercase">
+                    
+                    <button onclick="checkEmoji()" class="w-full py-5 rounded-3xl gold-gradient text-slate-900 font-black text-lg shadow-xl active:scale-95 transition-transform">SUBMIT JAWABAN</button>
+                </div>
+            `;
+            document.getElementById('emoji-ans').focus();
+        }
+
+        function checkEmoji() {
+            const val = document.getElementById('emoji-ans').value.trim().toUpperCase();
+            const correct = GAME_DB.emoji[currentEmojiIndex].answer;
+            const inputEl = document.getElementById('emoji-ans');
+
+            if(val === correct) {
+                state.user.points += 50;
+                state.user.xp += 30;
+                showToast("LUAR BIASA! +50 Poin", "success");
+                currentEmojiIndex++;
+                
+                if(currentEmojiIndex < GAME_DB.emoji.length) {
+                    setTimeout(renderEmojiGame, 1000);
+                } else {
+                    setTimeout(() => finishGame("EMOJI MASTER SELESAI!", 200), 1000);
+                }
+            } else {
+                inputEl.classList.add('animate-shake', 'border-rose-500');
+                showToast("Coba Lagi!", "error");
+                setTimeout(() => inputEl.classList.remove('animate-shake'), 400);
+            }
+            storage.save();
+            updateGlobalUI();
+        }
+
+        // --- GAME: QUIZ TRIVIA ---
+        let qIdx = 0;
+        let qScore = 0;
+        function startQuiz() {
+            qIdx = 0;
+            qScore = 0;
+            renderQuiz();
+        }
+
+        function renderQuiz() {
+            const q = GAME_DB.quiz[qIdx];
+            let opts = '';
+            q.a.forEach((opt, i) => {
+                opts += `<button onclick="checkQuiz(${i})" class="w-full p-5 glass rounded-2xl text-left font-bold mb-3 hover:border-yellow-500 transition-all flex justify-between items-center group">
+                    <span>${opt}</span>
+                    <i class="fas fa-chevron-right opacity-0 group-hover:opacity-100 transition-all"></i>
+                </button>`;
+            });
+
+            document.getElementById('main-content').innerHTML = `
+                <div class="animate-pop">
+                    <div class="flex justify-between items-center mb-6">
+                         <button onclick="router.navigate('games')" class="text-slate-500"><i class="fas fa-times text-xl"></i></button>
+                         <div class="text-xs font-black uppercase tracking-widest text-slate-500">Soal ${qIdx + 1} / ${GAME_DB.quiz.length}</div>
+                    </div>
+                    <div class="glass p-8 rounded-[2rem] text-center mb-8 border-b-4 border-yellow-500">
+                        <h3 class="text-xl font-black">${q.q}</h3>
+                    </div>
+                    <div class="space-y-1">${opts}</div>
+                </div>
+            `;
+        }
+
+        function checkQuiz(i) {
+            if(i === GAME_DB.quiz[qIdx].c) {
+                qScore++;
+                showToast("BENAR!", "success");
+            } else {
+                showToast("SALAH!", "error");
+            }
+
+            qIdx++;
+            if(qIdx < GAME_DB.quiz.length) {
+                setTimeout(renderQuiz, 800);
+            } else {
+                const prize = qScore * 25;
+                state.user.points += prize;
+                state.user.xp += (qScore * 20);
+                storage.save();
+                updateGlobalUI();
+                setTimeout(() => finishGame("QUIZ SELESAI!", prize), 800);
+            }
+        }
+
+        // --- GAME: SCRAMBLE ---
+        let sIdx = 0;
+        function startScramble() {
+            sIdx = 0;
+            renderScramble();
+        }
+
+        function renderScramble() {
+            const item = GAME_DB.scramble[sIdx];
+            const scrambled = item.word.split('').sort(() => Math.random() - 0.5).join('');
+            
+            document.getElementById('main-content').innerHTML = `
+                <div class="animate-pop text-center">
+                    <h2 class="text-4xl font-black mb-8 gold-text tracking-[0.2em]">${scrambled}</h2>
+                    <div class="glass p-4 rounded-2xl mb-8 flex items-center justify-center gap-2">
+                         <i class="fas fa-lightbulb text-yellow-400"></i>
+                         <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">${item.hint}</p>
+                    </div>
+                    <input id="s-input" type="text" class="w-full bg-slate-800 p-5 rounded-3xl text-center font-black text-xl mb-4 focus:outline-none uppercase border-2 border-indigo-500">
+                    <button onclick="checkScramble()" class="w-full py-5 rounded-3xl bg-indigo-600 font-black shadow-lg">JAWAB</button>
+                </div>
+            `;
+            document.getElementById('s-input').focus();
+        }
+
+        function checkScramble() {
+            const val = document.getElementById('s-input').value.trim().toUpperCase();
+            if(val === GAME_DB.scramble[sIdx].word) {
+                state.user.points += 30;
+                state.user.xp += 20;
+                showToast("Sempurna!", "success");
+                sIdx++;
+                if(sIdx < GAME_DB.scramble.length) setTimeout(renderScramble, 800);
+                else finishGame("SCRAMBLE SELESAI", 100);
+            } else {
+                showToast("Salah!", "error");
+            }
+            storage.save();
+            updateGlobalUI();
+        }
+
+        function finishGame(title, bonus) {
+            document.getElementById('main-content').innerHTML = `
+                <div class="animate-pop text-center py-10">
+                    <div class="text-8xl mb-6">🏆</div>
+                    <h2 class="text-4xl font-black mb-2">${title}</h2>
+                    <p class="text-slate-400 mb-8 font-bold">Total Koin Didapat: <span class="text-yellow-400">+${bonus}</span></p>
+                    
+                    <div class="space-y-3">
+                        <button onclick="router.navigate('games')" class="w-full py-5 gold-gradient text-slate-900 font-black rounded-3xl shadow-xl">LANJUTKAN</button>
+                        <button onclick="router.navigate('home')" class="w-full py-4 bg-slate-800 font-black rounded-3xl">KE BERANDA</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- Init ---
+        window.onload = () => {
+            storage.load();
+            router.navigate('home');
+        };
+    </script>
+
+<script>
+    window.addEventListener("load", () => {
+        const splash = document.getElementById("splash");
+        const bar = document.getElementById("splash-progress");
+        const text = document.getElementById("splash-text");
+
+        let progress = 0;
+
+        const loading = setInterval(() => {
+            progress += Math.floor(Math.random() * 8) + 4; // naik natural
+            if (progress >= 100) progress = 100;
+
+            bar.style.width = progress + "%";
+            text.innerText = "LOADING " + progress + "%";
+
+            if (progress === 100) {
+                clearInterval(loading);
+
+                setTimeout(() => {
+                    splash.classList.add("opacity-0");
+                }, 300);
+
+                setTimeout(() => {
+                    splash.style.display = "none";
+                }, 900);
+            }
+        }, 120);
+    });
+</script>
+</body>
+</html>
