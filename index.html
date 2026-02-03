@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cinephile App - By Diginex Studio</title>
+    <title>Cinephile App - Diginex Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap');
         
         :root {
             --primary: #facc15;
             --secondary: #6366f1;
             --accent: #f43f5e;
             --bg: #020617;
+            --card-bg: rgba(30, 41, 59, 0.7);
         }
 
         body {
@@ -21,37 +22,55 @@
             background-color: var(--bg);
             color: #f8fafc;
             overflow-x: hidden;
+            /* Background mewah untuk desktop */
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(250, 204, 21, 0.1) 0%, transparent 20%);
         }
 
+        /* Glassmorphism Logic */
         .glass {
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-heavy {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .neon-border {
-            box-shadow: 0 0 15px rgba(250, 204, 21, 0.2);
-            border: 1px solid rgba(250, 204, 21, 0.4);
+            box-shadow: 0 0 15px rgba(250, 204, 21, 0.1);
+            border: 1px solid rgba(250, 204, 21, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .neon-border:hover {
+            box-shadow: 0 0 25px rgba(250, 204, 21, 0.3);
+            border-color: rgba(250, 204, 21, 0.8);
         }
 
         .gold-gradient {
             background: linear-gradient(135deg, #facc15 0%, #eab308 100%);
         }
-
-        .animate-pop {
-            animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        
+        .gold-text {
+            background: linear-gradient(135deg, #facc15 0%, #eab308 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
+        /* Animations */
         @keyframes pop {
-            0% { transform: scale(0.8); opacity: 0; }
+            0% { transform: scale(0.95); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
+        .animate-pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
-        .animate-shake {
-            animation: shake 0.4s;
-        }
-
+        .animate-shake { animation: shake 0.4s; }
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-8px); }
@@ -59,102 +78,173 @@
             75% { transform: translateX(-8px); }
         }
 
-        .progress-fill {
-            transition: width 0.5s ease-out;
-        }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
-        /* Card Hover Effects */
-        .game-card:active {
-            transform: scale(0.95);
+        /* Utility */
+        .desktop-card:hover { transform: translateY(-5px); }
+        
+        /* Active Nav State */
+        .nav-active-desktop {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-right: 4px solid #facc15;
         }
-
-        ::-webkit-scrollbar { width: 0px; }
+        .nav-active-mobile {
+            color: #facc15;
+        }
     </style>
 </head>
-<body class="min-h-screen pb-24">
+<body class="min-h-screen text-slate-200 selection:bg-yellow-500/30">
 
-<!-- Splash Screen -->
-<div id="splash" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#020617] transition-opacity duration-700">
-    
-    <h1 class="text-5xl font-black tracking-widest text-yellow-400 mb-3 animate-[pop_0.6s_ease-out]">
-        CINEPHILE
-    </h1>
-
-    <p class="text-sm tracking-wider text-white opacity-80 mb-8">
-        by Diginex Studio
-    </p>
-
-    <!-- Progress Bar -->
-    <div class="w-56 h-2 bg-slate-800 rounded-full overflow-hidden">
-        <div id="splash-progress" class="h-full bg-yellow-400 transition-all duration-300" style="width: 0%"></div>
+    <!-- Splash Screen -->
+    <div id="splash" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#020617] transition-opacity duration-700">
+        <div class="relative">
+            <div class="absolute inset-0 bg-yellow-500 blur-3xl opacity-20 animate-pulse"></div>
+            <h1 class="relative text-6xl md:text-8xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600 mb-4 animate-[pop_0.6s_ease-out]">
+                CINEPHILE
+            </h1>
+        </div>
+        <p class="text-sm tracking-[0.3em] text-slate-400 mb-12 uppercase">Digital Experience by Diginex</p>
+        <div class="w-64 h-1.5 bg-slate-800/50 rounded-full overflow-hidden border border-white/5">
+            <div id="splash-progress" class="h-full gold-gradient shadow-[0_0_15px_rgba(250,204,21,0.5)] transition-all duration-300" style="width: 0%"></div>
+        </div>
+        <span id="splash-text" class="mt-4 text-xs text-slate-500 font-mono">LOADING 0%</span>
     </div>
 
-    <span id="splash-text" class="mt-4 text-xs text-slate-400 tracking-widest">
-        LOADING 0%
-    </span>
-</div>
-
-    <!-- Global App State Display -->
-    <div id="app" class="max-w-md mx-auto px-4 pt-6">
+    <div class="flex h-screen overflow-hidden">
         
-        <!-- Premium Header -->
-        <header class="flex justify-between items-center mb-6 glass p-4 rounded-3xl neon-border relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-1 h-full gold-gradient"></div>
-            <div class="flex items-center gap-4">
-                <div id="user-avatar" class="w-14 h-14 gold-gradient rounded-2xl flex items-center justify-center text-slate-900 text-2xl shadow-lg shadow-yellow-500/20">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div>
-                    <h2 id="display-name" class="font-extrabold text-lg leading-tight">Cinephile</h2>
-                    <div class="flex items-center gap-2 mt-1">
-                        <span class="text-[10px] bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-tighter">Level <span id="user-level">1</span></span>
-                        <div class="w-20 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                            <div id="level-progress" class="progress-fill h-full gold-gradient" style="width: 30%"></div>
-                        </div>
+        <!-- DESKTOP SIDEBAR (Visible on lg screens) -->
+        <aside class="hidden lg:flex flex-col w-72 glass-heavy h-full z-20 relative">
+            <div class="p-8">
+                <h2 class="text-2xl font-black tracking-tighter gold-text flex items-center gap-3">
+                    <i class="fas fa-film"></i> CINEPHILE
+                </h2>
+            </div>
+
+            <nav class="flex-1 px-4 space-y-2">
+                <button onclick="router.navigate('home')" class="nav-btn w-full flex items-center gap-4 px-4 py-4 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all group text-left" data-page="home">
+                    <i class="fas fa-house-chimney text-xl group-hover:scale-110 transition-transform"></i>
+                    <span class="font-bold tracking-wide">Dashboard</span>
+                </button>
+                <button onclick="router.navigate('games')" class="nav-btn w-full flex items-center gap-4 px-4 py-4 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all group text-left" data-page="games">
+                    <i class="fas fa-gamepad text-xl group-hover:scale-110 transition-transform"></i>
+                    <span class="font-bold tracking-wide">Play Arena</span>
+                </button>
+                <button onclick="router.navigate('shop')" class="nav-btn w-full flex items-center gap-4 px-4 py-4 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all group text-left" data-page="shop">
+                    <i class="fas fa-store text-xl group-hover:scale-110 transition-transform"></i>
+                    <span class="font-bold tracking-wide">Marketplace</span>
+                </button>
+                <button onclick="router.navigate('settings')" class="nav-btn w-full flex items-center gap-4 px-4 py-4 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all group text-left" data-page="settings">
+                    <i class="fas fa-trophy text-xl group-hover:scale-110 transition-transform"></i>
+                    <span class="font-bold tracking-wide">Leaderboard</span>
+                </button>
+            </nav>
+
+            <div class="p-6 mt-auto">
+                <div class="glass p-4 rounded-2xl border-yellow-500/20 bg-gradient-to-br from-yellow-500/10 to-transparent">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-bold text-yellow-400 uppercase">Season 4</span>
+                        <span class="text-xs font-bold text-white">Level <span class="app-level">1</span></span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                        <div class="app-xp-bar h-full gold-gradient w-[0%] transition-all duration-500"></div>
                     </div>
                 </div>
             </div>
-            <div class="flex flex-col items-end">
-                <div class="flex items-center gap-2 bg-slate-800/50 px-3 py-1 rounded-full border border-white/5">
-                    <i class="fas fa-coins text-yellow-400 text-xs"></i>
-                    <span id="user-points" class="font-black text-yellow-400 text-sm">0</span>
-                </div>
-            </div>
-        </header>
+        </aside>
 
-        <!-- Dynamic Content -->
-        <main id="main-content" class="animate-pop">
-            <!-- Injected by JS -->
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 h-full overflow-y-auto overflow-x-hidden relative scroll-smooth flex flex-col">
+            
+            <!-- Desktop Header -->
+            <header class="sticky top-0 z-30 backdrop-blur-md bg-[#020617]/80 border-b border-white/5 px-6 py-4 flex justify-between items-center lg:px-10 lg:py-6">
+                <!-- Mobile Logo (Hidden on Desktop) -->
+                <div class="lg:hidden font-black text-xl text-yellow-400 tracking-widest">CINEPHILE</div>
+
+                <!-- Desktop Search -->
+                <div class="hidden lg:flex items-center gap-4 w-96">
+                    <div class="relative w-full group">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-yellow-400 transition-colors"></i>
+                        <input type="text" placeholder="Search movies, games..." class="w-full bg-slate-800/50 border border-white/10 rounded-full py-2.5 pl-12 pr-4 text-sm focus:outline-none focus:border-yellow-500/50 focus:bg-slate-800 transition-all">
+                    </div>
+                </div>
+
+                <!-- User Stats Header -->
+                <div class="flex items-center gap-4 md:gap-6">
+                    <div class="flex items-center gap-2 bg-slate-800/80 px-4 py-2 rounded-full border border-yellow-500/20 hover:border-yellow-500/50 transition-colors cursor-pointer group">
+                        <div class="w-6 h-6 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                            <i class="fas fa-coins text-yellow-400 text-xs group-hover:rotate-12 transition-transform"></i>
+                        </div>
+                        <span class="app-points font-black text-yellow-400 text-sm">0</span>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 pl-6 border-l border-white/10">
+                        <div class="text-right hidden sm:block">
+                            <div class="app-name text-sm font-bold text-white">Guest</div>
+                            <div class="text-[10px] text-slate-400 uppercase tracking-wider">Level <span class="app-level">1</span></div>
+                        </div>
+                        <div class="app-avatar-container w-10 h-10 gold-gradient rounded-xl flex items-center justify-center text-slate-900 font-bold shadow-lg shadow-yellow-500/20 cursor-pointer hover:scale-105 transition-transform">
+                            <i class="app-avatar-icon fas fa-user"></i>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Injection -->
+            <div id="main-content" class="flex-1 p-4 pb-28 lg:p-10 lg:pb-10 max-w-7xl mx-auto w-full">
+                <!-- Javascript will inject content here -->
+            </div>
+
         </main>
 
-        <!-- Floating Navigation -->
-        <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md glass border border-white/10 rounded-3xl p-3 flex justify-around items-center z-50 shadow-2xl">
-            <button onclick="router.navigate('home')" class="nav-item group flex flex-col items-center gap-1" data-page="home">
-                <div class="p-2 rounded-xl group-hover:bg-yellow-500/10 transition-colors">
-                    <i class="fas fa-house-chimney text-xl"></i>
+        <!-- RIGHT SIDEBAR (Desktop Only - Extra Info) -->
+        <aside class="hidden xl:block w-80 glass-heavy border-l border-white/5 p-6 overflow-y-auto z-20">
+            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-6">Trending Now</h3>
+            
+            <div class="group flex gap-4 items-center mb-6 cursor-pointer hover:bg-white/5 p-2 rounded-xl transition-all">
+                <div class="w-12 h-16 bg-slate-700 rounded-lg overflow-hidden flex items-center justify-center text-2xl">🍿</div>
+                <div>
+                    <h4 class="font-bold text-sm text-white group-hover:text-yellow-400 transition-colors">Dune: Part Two</h4>
+                    <p class="text-xs text-slate-500">Sci-Fi • Trending #1</p>
                 </div>
-                <span class="text-[9px] font-bold uppercase opacity-50">Home</span>
-            </button>
-            <button onclick="router.navigate('games')" class="nav-item group flex flex-col items-center gap-1" data-page="games">
-                <div class="p-2 rounded-xl group-hover:bg-yellow-500/10 transition-colors">
-                    <i class="fas fa-clapperboard text-xl"></i>
+            </div>
+
+            <div class="my-8 h-px bg-white/10 w-full"></div>
+
+            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Daily Quests</h3>
+            <div class="space-y-3">
+                <div class="p-3 bg-slate-800/50 rounded-xl border border-white/5 hover:border-yellow-500/30 transition-colors">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-xs font-bold text-white">Mainkan Emoji Master</span>
+                        <span class="text-[10px] font-bold bg-yellow-500/20 text-yellow-400 px-1.5 py-0.5 rounded">+50 XP</span>
+                    </div>
+                    <div class="w-full h-1.5 bg-slate-700 rounded-full">
+                        <div class="h-full bg-green-500 w-2/3 rounded-full"></div>
+                    </div>
                 </div>
-                <span class="text-[9px] font-bold uppercase opacity-50">Play</span>
-            </button>
-            <button onclick="router.navigate('shop')" class="nav-item group flex flex-col items-center gap-1" data-page="shop">
-                <div class="p-2 rounded-xl group-hover:bg-yellow-500/10 transition-colors">
-                    <i class="fas fa-gem text-xl"></i>
-                </div>
-                <span class="text-[9px] font-bold uppercase opacity-50">Shop</span>
-            </button>
-            <button onclick="router.navigate('settings')" class="nav-item group flex flex-col items-center gap-1" data-page="settings">
-                <div class="p-2 rounded-xl group-hover:bg-yellow-500/10 transition-colors">
-                    <i class="fas fa-user-ninja text-xl"></i>
-                </div>
-                <span class="text-[9px] font-bold uppercase opacity-50">Rank</span>
-            </button>
-        </nav>
+            </div>
+        </aside>
     </div>
+
+    <!-- Mobile Bottom Navigation (Hidden on LG) -->
+    <nav class="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md glass border border-white/10 rounded-2xl p-2 flex justify-around items-center z-50 shadow-2xl">
+        <button onclick="router.navigate('home')" class="nav-item-mobile group flex flex-col items-center gap-1 p-2 w-14 transition-all rounded-xl" data-page="home">
+            <i class="fas fa-house-chimney text-xl text-slate-400 group-hover:text-yellow-400 transition-colors"></i>
+        </button>
+        <button onclick="router.navigate('games')" class="nav-item-mobile group flex flex-col items-center gap-1 p-2 w-14 transition-all rounded-xl" data-page="games">
+            <i class="fas fa-gamepad text-xl text-slate-400 group-hover:text-yellow-400 transition-colors"></i>
+        </button>
+        <button onclick="router.navigate('shop')" class="nav-item-mobile group flex flex-col items-center gap-1 p-2 w-14 transition-all rounded-xl" data-page="shop">
+            <i class="fas fa-store text-xl text-slate-400 group-hover:text-yellow-400 transition-colors"></i>
+        </button>
+        <button onclick="router.navigate('settings')" class="nav-item-mobile group flex flex-col items-center gap-1 p-2 w-14 transition-all rounded-xl" data-page="settings">
+            <i class="fas fa-trophy text-xl text-slate-400 group-hover:text-yellow-400 transition-colors"></i>
+        </button>
+    </nav>
 
     <!-- Fancy Toast -->
     <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-2xl shadow-2xl transition-all duration-500 transform -translate-y-32 opacity-0 pointer-events-none flex items-center gap-3">
@@ -162,6 +252,7 @@
         <span id="toast-msg" class="font-bold"></span>
     </div>
 
+    <!-- JS Logic -->
     <script>
         // --- Game Database ---
         const GAME_DB = {
@@ -188,10 +279,10 @@
             ]
         };
 
-        // --- State ---
+        // --- State Management ---
         let state = {
             user: {
-                name: "Cinephile #1",
+                name: "Cinephile User",
                 points: 0,
                 level: 1,
                 xp: 0,
@@ -201,28 +292,28 @@
             }
         };
 
-        // --- Storage ---
         const storage = {
             save: () => {
-                localStorage.setItem('cinequest_v2_data', JSON.stringify(state.user));
+                localStorage.setItem('cinequest_ultimate_data', JSON.stringify(state.user));
             },
             load: () => {
-                const data = localStorage.getItem('cinequest_v2_data');
+                const data = localStorage.getItem('cinequest_ultimate_data');
                 if (data) state.user = JSON.parse(data);
                 updateGlobalUI();
             }
         };
 
         const updateGlobalUI = () => {
-            document.getElementById('user-points').innerText = state.user.points.toLocaleString();
-            document.getElementById('user-level').innerText = state.user.level;
-            document.getElementById('display-name').innerText = state.user.name;
-            document.getElementById('user-avatar').innerHTML = `<i class="${state.user.avatar}"></i>`;
+            // Update all elements with class identifiers (to handle desktop/mobile duplicates)
+            document.querySelectorAll('.app-points').forEach(el => el.innerText = state.user.points.toLocaleString());
+            document.querySelectorAll('.app-level').forEach(el => el.innerText = state.user.level);
+            document.querySelectorAll('.app-name').forEach(el => el.innerText = state.user.name);
+            document.querySelectorAll('.app-avatar-icon').forEach(el => el.className = `app-avatar-icon ${state.user.avatar}`);
             
-            // Level progress (XP per level is level * 200)
+            // XP Progress
             const targetXp = state.user.level * 200;
             const progress = (state.user.xp / targetXp) * 100;
-            document.getElementById('level-progress').style.width = `${Math.min(progress, 100)}%`;
+            document.querySelectorAll('.app-xp-bar').forEach(el => el.style.width = `${Math.min(progress, 100)}%`);
 
             if(state.user.xp >= targetXp) {
                 state.user.level++;
@@ -263,18 +354,28 @@
             navigate: (page) => {
                 const main = document.getElementById('main-content');
                 
-                // Active Nav Styling
-                document.querySelectorAll('.nav-item').forEach(item => {
-                    const icon = item.querySelector('i');
-                    const span = item.querySelector('span');
-                    if(item.dataset.page === page) {
-                        icon.className = icon.className.replace('text-xl', 'text-2xl text-yellow-400');
-                        span.classList.remove('opacity-50');
-                        span.classList.add('text-yellow-400', 'opacity-100');
+                // Update Desktop Sidebar
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    if (btn.dataset.page === page) {
+                        btn.classList.add('nav-active-desktop');
+                        btn.classList.remove('text-slate-400');
                     } else {
-                        icon.className = icon.className.replace('text-2xl text-yellow-400', 'text-xl');
-                        span.classList.add('opacity-50');
-                        span.classList.remove('text-yellow-400', 'opacity-100');
+                        btn.classList.remove('nav-active-desktop');
+                        btn.classList.add('text-slate-400');
+                    }
+                });
+
+                // Update Mobile Nav
+                document.querySelectorAll('.nav-item-mobile').forEach(btn => {
+                    const icon = btn.querySelector('i');
+                    if (btn.dataset.page === page) {
+                        icon.classList.add('text-yellow-400');
+                        icon.classList.remove('text-slate-400');
+                        btn.classList.add('bg-yellow-500/10');
+                    } else {
+                        icon.classList.remove('text-yellow-400');
+                        icon.classList.add('text-slate-400');
+                        btn.classList.remove('bg-yellow-500/10');
                     }
                 });
 
@@ -290,7 +391,7 @@
             }
         };
 
-        // --- Page Renders ---
+        // --- Render Functions (Updated for Responsive Layout) ---
 
         function renderHome() {
             const now = Date.now();
@@ -299,78 +400,104 @@
 
             document.getElementById('main-content').innerHTML = `
                 <div class="animate-pop space-y-6">
-                    <!-- Daily Bonus Section -->
-                    <div class="glass p-6 rounded-[2rem] relative overflow-hidden">
-                        <div class="flex justify-between items-center relative z-10">
-                            <div>
-                                <h3 class="text-xl font-black italic">BONUS HARIAN</h3>
-                                <p class="text-xs text-slate-400">Klaim koin gratis tiap 24 jam!</p>
+                    <!-- Hero Banner -->
+                    <div class="relative w-full h-64 md:h-80 rounded-3xl overflow-hidden group neon-border cursor-pointer">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/50 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 p-6 md:p-10 w-full md:w-2/3">
+                            <span class="px-3 py-1 bg-yellow-500 text-black text-xs font-bold rounded-full uppercase tracking-wider mb-3 inline-block animate-pulse">NEW GAME</span>
+<h2 class="text-3xl md:text-5xl font-black text-white mb-2 leading-tight">
+  Shooting Simulator
+</h2>
+<p class="text-slate-300 text-sm md:text-lg mb-4">
+  Rasakan tekanan produksi film dari pra hingga pasca. 
+  Salah ambil keputusan, karier hancur.
+</p>
+<button onclick="Cinephile.route('shooting-simulator.html')" 
+  class="bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-yellow-400 transition-colors inline-flex items-center gap-2">
+    <i class="fas fa-clapperboard"></i> Mulai Produksi
+</button>
+                        </div>
+                    </div>
+
+                    <!-- Daily & Stats Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Daily Bonus -->
+                        <div class="glass p-6 rounded-[2rem] relative overflow-hidden flex flex-col justify-between">
+                            <div class="relative z-10">
+                                <h3 class="text-xl font-black italic mb-1">BONUS HARIAN</h3>
+                                <p class="text-xs text-slate-400 mb-4">Klaim koin gratis tiap 24 jam!</p>
+                                <button onclick="claimDaily()" ${!canClaim ? 'disabled' : ''} class="w-full py-3 rounded-2xl font-black text-sm transition-all ${canClaim ? 'gold-gradient text-slate-900 shadow-lg shadow-yellow-500/40 active:scale-95' : 'bg-slate-800 text-slate-500 cursor-not-allowed'}">
+                                    ${canClaim ? 'KLAIM +100' : 'TERKLAIM'}
+                                </button>
                             </div>
-                            <button onclick="claimDaily()" ${!canClaim ? 'disabled' : ''} class="px-6 py-3 rounded-2xl font-black text-sm transition-all ${canClaim ? 'gold-gradient text-slate-900 shadow-lg shadow-yellow-500/40 active:scale-95' : 'bg-slate-800 text-slate-500 cursor-not-allowed'}">
-                                ${canClaim ? 'KLAIM +100' : 'TERKLAIM'}
-                            </button>
+                            <div class="absolute -right-4 -bottom-4 opacity-10 text-8xl rotate-12"><i class="fas fa-gift"></i></div>
                         </div>
-                        <div class="absolute -right-4 -bottom-4 opacity-10 text-8xl rotate-12"><i class="fas fa-gift"></i></div>
-                    </div>
 
-                    <!-- Hero Stats -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="glass p-5 rounded-3xl border-b-4 border-indigo-500">
-                            <i class="fas fa-bolt text-indigo-400 mb-2"></i>
+                        <!-- Collection Stat -->
+                        <div class="glass p-5 rounded-3xl border-b-4 border-indigo-500 flex flex-col justify-center relative overflow-hidden">
+                            <i class="fas fa-bolt text-indigo-400 mb-2 text-2xl"></i>
                             <p class="text-[10px] uppercase font-black text-slate-500">Koleksi Item</p>
-                            <p class="text-2xl font-black">${state.user.inventory.length}</p>
+                            <p class="text-4xl font-black">${state.user.inventory.length}</p>
+                            <i class="fas fa-shirt absolute right-4 bottom-4 text-6xl text-indigo-500/10"></i>
                         </div>
-                        <div class="glass p-5 rounded-3xl border-b-4 border-emerald-500">
-                            <i class="fas fa-trophy text-emerald-400 mb-2"></i>
-                            <p class="text-[10px] uppercase font-black text-slate-500">Level Rank</p>
-                            <p class="text-2xl font-black">${state.user.level >= 10 ? 'Elite' : 'Rookie'}</p>
+
+                        <!-- Rank Stat -->
+                        <div class="glass p-5 rounded-3xl border-b-4 border-emerald-500 flex flex-col justify-center relative overflow-hidden">
+                            <i class="fas fa-trophy text-emerald-400 mb-2 text-2xl"></i>
+                            <p class="text-[10px] uppercase font-black text-slate-500">Status Rank</p>
+                            <p class="text-4xl font-black">${state.user.level >= 10 ? 'Elite' : 'Rookie'}</p>
+                            <i class="fas fa-star absolute right-4 bottom-4 text-6xl text-emerald-500/10"></i>
                         </div>
                     </div>
 
-                    <!-- Featured Action -->
-                    <div onclick="router.navigate('game-emoji')" class="relative glass rounded-[2rem] p-8 overflow-hidden cursor-pointer group active:scale-95 transition-all">
-                        <div class="relative z-10">
+                    <!-- Featured Game Wide -->
+                    <div onclick="router.navigate('game-emoji')" class="relative glass rounded-[2rem] p-8 overflow-hidden cursor-pointer group active:scale-[0.99] transition-all hover:bg-slate-800/80">
+                        <div class="relative z-10 max-w-lg">
                             <span class="bg-rose-500 text-[10px] font-black px-3 py-1 rounded-full uppercase mb-4 inline-block">Trending Game</span>
-                            <h2 class="text-3xl font-black leading-tight mb-2">TEBAK FILM <br>VIA EMOJI 🧩</h2>
-                            <p class="text-slate-400 text-sm">Gunakan imajinasimu untuk <br>menebak judul film.</p>
+                            <h2 class="text-3xl md:text-4xl font-black leading-tight mb-2">TEBAK FILM <br>VIA EMOJI 🧩</h2>
+                            <p class="text-slate-400 text-sm">Gunakan imajinasimu untuk menebak judul film dari kombinasi emoji unik.</p>
                         </div>
-                        <div class="absolute right-[-20px] bottom-[-20px] text-[150px] opacity-10 group-hover:rotate-12 transition-transform duration-500">🎬</div>
+                        <div class="absolute right-[-20px] bottom-[-20px] text-[120px] md:text-[200px] opacity-10 group-hover:rotate-12 transition-transform duration-500">🎬</div>
                     </div>
                 </div>
             `;
         }
 
         function renderGamesMenu() {
+            const gameCard = (title, desc, icon, color, action, xp) => `
+                <div onclick="${action}" class="glass p-6 rounded-[2rem] flex flex-col md:flex-row items-center md:items-start gap-5 border-b-4 border-${color}-500 cursor-pointer hover:bg-slate-800/80 transition-all group desktop-card h-full">
+                    <div class="w-20 h-20 rounded-2xl bg-${color}-500/10 flex items-center justify-center text-4xl text-${color}-400 group-hover:scale-110 transition-transform shadow-lg shadow-${color}-500/20">
+                        ${icon}
+                    </div>
+                    <div class="flex-1 text-center md:text-left">
+                        <h3 class="font-black text-xl mb-1">${title}</h3>
+                        <p class="text-xs text-slate-400 mb-3">${desc}</p>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 bg-${color}-500/10 rounded-lg">
+                            <span class="text-[10px] font-bold text-${color}-500"><i class="fas fa-plus"></i> ${xp} XP / Game</span>
+                        </div>
+                    </div>
+                    <div class="hidden md:block self-center">
+                        <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white group-hover:bg-${color}-500 group-hover:text-black transition-colors">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+                </div>
+            `;
+
             document.getElementById('main-content').innerHTML = `
-                <div class="animate-pop space-y-4">
-                    <h2 class="text-2xl font-black mb-6 flex items-center gap-3">
-                        <i class="fas fa-gamepad text-yellow-400"></i> Arcade Center
-                    </h2>
+                <div class="animate-pop">
+                    <h2 class="text-3xl font-black mb-2 text-white">Arcade Arena</h2>
+                    <p class="text-slate-400 mb-8">Pilih tantanganmu dan raih peringkat tertinggi.</p>
 
-                    <div onclick="router.navigate('game-quiz')" class="game-card glass p-6 rounded-[2rem] flex items-center gap-5 border-r-4 border-yellow-500 cursor-pointer hover:bg-slate-800/50 transition-all">
-                        <div class="w-16 h-16 rounded-2xl bg-yellow-500/10 flex items-center justify-center text-3xl text-yellow-400"><i class="fas fa-brain"></i></div>
-                        <div>
-                            <h3 class="font-black text-lg">Movie Trivia Quiz</h3>
-                            <p class="text-xs text-slate-400">Uji wawasan luasmu di sini.</p>
-                            <div class="mt-2 text-[10px] font-bold text-yellow-500"><i class="fas fa-plus"></i> 100 XP / Game</div>
-                        </div>
-                    </div>
-
-                    <div onclick="router.navigate('game-emoji')" class="game-card glass p-6 rounded-[2rem] flex items-center gap-5 border-r-4 border-rose-500 cursor-pointer hover:bg-slate-800/50 transition-all">
-                        <div class="w-16 h-16 rounded-2xl bg-rose-500/10 flex items-center justify-center text-3xl text-rose-400">🧩</div>
-                        <div>
-                            <h3 class="font-black text-lg">Emoji Movie Master</h3>
-                            <p class="text-xs text-slate-400">Tebak film dari susunan emoji.</p>
-                            <div class="mt-2 text-[10px] font-bold text-rose-500"><i class="fas fa-plus"></i> 150 XP / Game</div>
-                        </div>
-                    </div>
-
-                    <div onclick="router.navigate('game-scramble')" class="game-card glass p-6 rounded-[2rem] flex items-center gap-5 border-r-4 border-indigo-500 cursor-pointer hover:bg-slate-800/50 transition-all">
-                        <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-3xl text-indigo-400"><i class="fas fa-font"></i></div>
-                        <div>
-                            <h3 class="font-black text-lg">Word Scramble</h3>
-                            <p class="text-xs text-slate-400">Susun huruf judul film acak.</p>
-                            <div class="mt-2 text-[10px] font-bold text-indigo-500"><i class="fas fa-plus"></i> 50 XP / Game</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${gameCard('Movie Trivia', 'Uji wawasan perfilmanmu dari klasik hingga modern.', '<i class="fas fa-brain"></i>', 'yellow', "router.navigate('game-quiz')", '100')}
+                        ${gameCard('Emoji Master', 'Tebak judul film dari kombinasi emoji.', '🧩', 'rose', "router.navigate('game-emoji')", '150')}
+                        ${gameCard('Word Scramble', 'Susun kembali huruf judul film yang acak.', '<i class="fas fa-font"></i>', 'indigo', "router.navigate('game-scramble')", '50')}
+                        
+                        <!-- Coming Soon Card -->
+                        <div class="glass p-6 rounded-[2rem] flex flex-col items-center justify-center border-2 border-dashed border-slate-700 opacity-50">
+                            <i class="fas fa-lock text-3xl mb-2"></i>
+                            <span class="font-bold text-sm">Segera Hadir</span>
                         </div>
                     </div>
                 </div>
@@ -383,7 +510,10 @@
             { id: 'v-2', name: 'Cyber Neon', price: 500, icon: 'fas fa-bolt', color: 'text-blue-400' },
             { id: 'v-3', name: 'Hot Fire', price: 1000, icon: 'fas fa-fire', color: 'text-orange-500' },
             { id: 'v-4', name: 'King Crown', price: 2500, icon: 'fas fa-crown', color: 'text-yellow-600' },
-            { id: 'v-5', name: 'The Dragon', price: 5000, icon: 'fas fa-dragon', color: 'text-rose-500' }
+            { id: 'v-5', name: 'The Dragon', price: 5000, icon: 'fas fa-dragon', color: 'text-rose-500' },
+            { id: 'v-6', name: 'Space Bot', price: 3000, icon: 'fas fa-robot', color: 'text-cyan-400' },
+            { id: 'v-7', name: 'Ghost', price: 1500, icon: 'fas fa-ghost', color: 'text-purple-400' },
+            { id: 'v-8', name: 'Ninja', price: 4000, icon: 'fas fa-user-ninja', color: 'text-slate-200' }
         ];
 
         function renderShop() {
@@ -391,14 +521,19 @@
             ITEMS.forEach(item => {
                 const owned = state.user.inventory.includes(item.id);
                 listHTML += `
-                    <div class="glass p-5 rounded-3xl flex flex-col items-center text-center">
-                        <div class="w-14 h-14 bg-slate-800 rounded-2xl flex items-center justify-center text-2xl ${item.color} mb-3">
+                    <div class="desktop-card glass p-6 rounded-3xl flex flex-col items-center text-center border border-white/5 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <i class="fas fa-info-circle text-slate-500"></i>
+                        </div>
+                        <div class="w-20 h-20 bg-slate-800/80 rounded-full flex items-center justify-center text-3xl ${item.color} mb-4 shadow-xl">
                             <i class="${item.icon}"></i>
                         </div>
-                        <h4 class="font-black text-xs uppercase mb-1">${item.name}</h4>
-                        <p class="text-yellow-400 font-bold text-xs mb-4"><i class="fas fa-coins"></i> ${item.price}</p>
-                        <button onclick="buyItem('${item.id}', ${item.price})" ${owned ? 'disabled' : ''} class="w-full py-2 rounded-xl text-[10px] font-black uppercase transition-all ${owned ? 'bg-slate-700 text-slate-500' : 'bg-white text-slate-900 hover:bg-yellow-400'}">
-                            ${owned ? 'Dimiliki' : 'Beli'}
+                        <h4 class="font-black text-sm uppercase mb-1 tracking-wider">${item.name}</h4>
+                        <p class="text-yellow-400 font-bold text-sm mb-5 flex items-center gap-1">
+                            <i class="fas fa-coins text-[10px]"></i> ${item.price.toLocaleString()}
+                        </p>
+                        <button onclick="buyItem('${item.id}', ${item.price})" ${owned ? 'disabled' : ''} class="w-full py-2.5 rounded-xl text-xs font-black uppercase transition-all ${owned ? 'bg-slate-700/50 text-slate-500 cursor-default' : 'bg-white text-slate-900 hover:bg-yellow-400 hover:scale-105 shadow-lg'}">
+                            ${owned ? 'DIMILIKI' : 'BELI SEKARANG'}
                         </button>
                     </div>
                 `;
@@ -406,8 +541,22 @@
 
             document.getElementById('main-content').innerHTML = `
                 <div class="animate-pop">
-                    <h2 class="text-2xl font-black mb-6">Premium Shop</h2>
-                    <div class="grid grid-cols-2 gap-4">${listHTML}</div>
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                        <div>
+                            <h2 class="text-3xl font-black text-white">Store</h2>
+                            <p class="text-slate-400">Tukarkan koinmu dengan avatar eksklusif.</p>
+                        </div>
+                        <div class="bg-yellow-500/10 border border-yellow-500/20 px-6 py-3 rounded-2xl flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-500">
+                                <i class="fas fa-wallet"></i>
+                            </div>
+                            <div>
+                                <div class="text-[10px] text-yellow-500/70 font-bold uppercase">Saldo Kamu</div>
+                                <div class="text-xl font-black text-yellow-400">${state.user.points.toLocaleString()}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">${listHTML}</div>
                 </div>
             `;
         }
@@ -425,38 +574,82 @@
             }
         }
 
-        // --- Settings / Rank ---
+        // --- Settings / Leaderboard ---
         function renderSettings() {
             let inventoryHTML = '';
             ITEMS.forEach(item => {
                 if(state.user.inventory.includes(item.id)) {
                     inventoryHTML += `
-                        <button onclick="setAvatar('${item.icon}')" class="w-12 h-12 rounded-xl bg-slate-800 border-2 ${state.user.avatar === item.icon ? 'border-yellow-500' : 'border-transparent'} flex items-center justify-center">
-                            <i class="${item.icon} ${item.color}"></i>
+                        <button onclick="setAvatar('${item.icon}')" class="w-16 h-16 rounded-2xl bg-slate-800/80 border-2 ${state.user.avatar === item.icon ? 'border-yellow-500 shadow-[0_0_15px_rgba(250,204,21,0.5)]' : 'border-transparent hover:border-white/20'} flex items-center justify-center transition-all hover:scale-105">
+                            <i class="${item.icon} ${item.color} text-2xl"></i>
                         </button>
                     `;
                 }
             });
 
+            // Default Avatar Button
+            const defaultAvatarBtn = `
+                <button onclick="setAvatar('fas fa-user')" class="w-16 h-16 rounded-2xl bg-slate-800/80 border-2 ${state.user.avatar === 'fas fa-user' ? 'border-yellow-500 shadow-[0_0_15px_rgba(250,204,21,0.5)]' : 'border-transparent hover:border-white/20'} flex items-center justify-center transition-all hover:scale-105">
+                    <i class="fas fa-user text-white text-2xl"></i>
+                </button>
+            `;
+
             document.getElementById('main-content').innerHTML = `
-                <div class="animate-pop space-y-6">
-                    <div class="glass p-6 rounded-[2rem] text-center">
-                        <div class="w-24 h-24 gold-gradient mx-auto rounded-3xl flex items-center justify-center text-4xl text-slate-900 shadow-xl mb-4">
-                            <i class="${state.user.avatar}"></i>
+                <div class="animate-pop grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Profile Card -->
+                    <div class="lg:col-span-1">
+                        <div class="glass p-8 rounded-[2rem] text-center relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-yellow-500/10 to-transparent"></div>
+                            
+                            <div class="w-32 h-32 gold-gradient mx-auto rounded-[2rem] flex items-center justify-center text-5xl text-slate-900 shadow-2xl mb-6 relative z-10 rotate-3">
+                                <i class="${state.user.avatar}"></i>
+                            </div>
+                            
+                            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Edit Nama</h3>
+                            <input id="new-name" type="text" value="${state.user.name}" class="bg-slate-800/80 text-center font-black text-xl w-full py-3 rounded-xl focus:outline-none focus:ring-2 ring-yellow-500 mb-4 border border-white/5">
+                            <button onclick="updateName()" class="w-full py-3 bg-white text-black rounded-xl text-xs font-bold hover:bg-yellow-400 transition-colors uppercase tracking-wider">Simpan Profil</button>
+                            
+                            <div class="mt-8 pt-8 border-t border-white/5">
+                                <button onclick="resetApp()" class="text-rose-500 text-xs font-bold hover:text-rose-400 transition-colors flex items-center justify-center gap-2 mx-auto">
+                                    <i class="fas fa-trash"></i> Reset Progress
+                                </button>
+                            </div>
                         </div>
-                        <input id="new-name" type="text" value="${state.user.name}" class="bg-slate-800 text-center font-black text-xl w-full py-2 rounded-xl focus:outline-none focus:ring-2 ring-yellow-500 mb-4">
-                        <button onclick="updateName()" class="px-6 py-2 bg-slate-700 rounded-full text-xs font-bold">Update Profil</button>
                     </div>
 
-                    <div class="glass p-6 rounded-[2rem]">
-                        <h3 class="font-black text-sm uppercase mb-4 text-slate-400 tracking-widest text-center">Koleksi Avatar</h3>
-                        <div class="flex flex-wrap justify-center gap-3">
-                            <button onclick="setAvatar('fas fa-user')" class="w-12 h-12 rounded-xl bg-slate-800 border-2 ${state.user.avatar === 'fas fa-user' ? 'border-yellow-500' : 'border-transparent'} flex items-center justify-center"><i class="fas fa-user"></i></button>
-                            ${inventoryHTML}
+                    <!-- Inventory & Stats -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <div class="glass p-8 rounded-[2rem]">
+                            <h3 class="font-black text-lg mb-6 flex items-center gap-2">
+                                <i class="fas fa-layer-group text-yellow-400"></i> Koleksi Avatar
+                            </h3>
+                            <div class="flex flex-wrap gap-4">
+                                ${defaultAvatarBtn}
+                                ${inventoryHTML}
+                            </div>
+                        </div>
+
+                        <!-- Dummy Leaderboard -->
+                        <div class="glass p-8 rounded-[2rem]">
+                            <h3 class="font-black text-lg mb-4 flex items-center gap-2">
+                                <i class="fas fa-globe text-indigo-400"></i> Global Top 5
+                            </h3>
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+                                    <div class="flex items-center gap-3"><span class="w-6 text-center font-black text-yellow-400">1</span> <span>MovieMaster99</span></div>
+                                    <span class="font-mono text-yellow-400">99,999</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+                                    <div class="flex items-center gap-3"><span class="w-6 text-center font-black text-slate-300">2</span> <span>NolanFanboy</span></div>
+                                    <span class="font-mono text-slate-300">85,200</span>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-yellow-500/30">
+                                    <div class="flex items-center gap-3"><span class="w-6 text-center font-black text-orange-400">#</span> <span>${state.user.name} (You)</span></div>
+                                    <span class="font-mono text-white">${state.user.points}</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-
-                    <button onclick="resetApp()" class="w-full py-4 text-rose-500 font-bold opacity-50 hover:opacity-100 transition-opacity">Reset Seluruh Progres</button>
                 </div>
             `;
         }
@@ -480,8 +673,8 @@
         }
 
         function resetApp() {
-            if(confirm("Hapus semua data?")) {
-                localStorage.removeItem('cinequest_v2_data');
+            if(confirm("Hapus semua data progres dan kembali ke awal?")) {
+                localStorage.removeItem('cinequest_ultimate_data');
                 location.reload();
             }
         }
@@ -495,7 +688,9 @@
             showToast("Bonus +100 Koin Diklaim!", "success");
         }
 
-        // --- GAME: EMOJI MASTER ---
+        // --- GAMES LOGIC ---
+
+        // EMOJI MASTER
         let currentEmojiIndex = 0;
         function startEmoji() {
             currentEmojiIndex = 0;
@@ -505,24 +700,28 @@
         function renderEmojiGame() {
             const game = GAME_DB.emoji[currentEmojiIndex];
             document.getElementById('main-content').innerHTML = `
-                <div class="animate-pop text-center">
+                <div class="animate-pop text-center max-w-2xl mx-auto mt-8">
                     <div class="flex justify-between items-center mb-8">
-                        <button onclick="router.navigate('games')" class="text-slate-500 hover:text-white"><i class="fas fa-arrow-left"></i></button>
-                        <span class="bg-rose-500/20 text-rose-400 px-4 py-1 rounded-full text-[10px] font-black uppercase">Level ${currentEmojiIndex + 1}</span>
+                        <button onclick="router.navigate('games')" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"><i class="fas fa-arrow-left"></i></button>
+                        <span class="bg-rose-500/20 text-rose-400 px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest">Level ${currentEmojiIndex + 1} / ${GAME_DB.emoji.length}</span>
                     </div>
 
-                    <div class="glass py-12 px-4 rounded-[3rem] mb-8 relative">
-                        <div class="text-7xl mb-6 drop-shadow-lg">${game.emoji}</div>
-                        <p class="text-slate-400 text-sm italic">" ${game.hint} "</p>
-                        <div class="absolute -top-4 -right-4 w-12 h-12 gold-gradient rounded-full flex items-center justify-center text-slate-900 font-black text-xl shadow-lg animate-bounce">?</div>
+                    <div class="glass py-16 px-6 rounded-[3rem] mb-8 relative border-2 border-white/5">
+                        <div class="text-7xl md:text-8xl mb-6 drop-shadow-2xl animate-float">${game.emoji}</div>
+                        <p class="text-slate-400 text-sm italic bg-black/30 inline-block px-4 py-1 rounded-full border border-white/10">" ${game.hint} "</p>
                     </div>
 
-                    <input id="emoji-ans" type="text" placeholder="KETIK JUDUL FILM..." class="w-full bg-slate-800 border-2 border-slate-700 p-5 rounded-3xl text-center font-black text-xl mb-4 focus:border-rose-500 focus:outline-none uppercase">
+                    <input id="emoji-ans" type="text" placeholder="KETIK JUDUL FILM..." class="w-full bg-slate-800 border-2 border-slate-700 p-5 rounded-3xl text-center font-black text-xl md:text-2xl mb-4 focus:border-rose-500 focus:outline-none uppercase transition-colors shadow-lg">
                     
-                    <button onclick="checkEmoji()" class="w-full py-5 rounded-3xl gold-gradient text-slate-900 font-black text-lg shadow-xl active:scale-95 transition-transform">SUBMIT JAWABAN</button>
+                    <button onclick="checkEmoji()" class="w-full py-5 rounded-3xl gold-gradient text-slate-900 font-black text-lg shadow-xl hover:scale-[1.02] active:scale-95 transition-all">SUBMIT JAWABAN</button>
                 </div>
             `;
             document.getElementById('emoji-ans').focus();
+            
+            // Allow Enter key
+            document.getElementById('emoji-ans').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') checkEmoji();
+            });
         }
 
         function checkEmoji() {
@@ -539,18 +738,18 @@
                 if(currentEmojiIndex < GAME_DB.emoji.length) {
                     setTimeout(renderEmojiGame, 1000);
                 } else {
-                    setTimeout(() => finishGame("EMOJI MASTER SELESAI!", 200), 1000);
+                    setTimeout(() => finishGame("EMOJI MASTER SELESAI!", 200, "games"), 1000);
                 }
             } else {
                 inputEl.classList.add('animate-shake', 'border-rose-500');
-                showToast("Coba Lagi!", "error");
+                showToast("Salah! Coba lagi.", "error");
                 setTimeout(() => inputEl.classList.remove('animate-shake'), 400);
             }
             storage.save();
             updateGlobalUI();
         }
 
-        // --- GAME: QUIZ TRIVIA ---
+        // QUIZ TRIVIA
         let qIdx = 0;
         let qScore = 0;
         function startQuiz() {
@@ -563,20 +762,21 @@
             const q = GAME_DB.quiz[qIdx];
             let opts = '';
             q.a.forEach((opt, i) => {
-                opts += `<button onclick="checkQuiz(${i})" class="w-full p-5 glass rounded-2xl text-left font-bold mb-3 hover:border-yellow-500 transition-all flex justify-between items-center group">
+                opts += `<button onclick="checkQuiz(${i})" class="w-full p-5 glass rounded-2xl text-left font-bold mb-3 hover:bg-yellow-500 hover:text-black hover:border-yellow-500 transition-all flex justify-between items-center group border border-white/5">
                     <span>${opt}</span>
                     <i class="fas fa-chevron-right opacity-0 group-hover:opacity-100 transition-all"></i>
                 </button>`;
             });
 
             document.getElementById('main-content').innerHTML = `
-                <div class="animate-pop">
+                <div class="animate-pop max-w-2xl mx-auto mt-8">
                     <div class="flex justify-between items-center mb-6">
-                         <button onclick="router.navigate('games')" class="text-slate-500"><i class="fas fa-times text-xl"></i></button>
-                         <div class="text-xs font-black uppercase tracking-widest text-slate-500">Soal ${qIdx + 1} / ${GAME_DB.quiz.length}</div>
+                         <button onclick="router.navigate('games')" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20"><i class="fas fa-times"></i></button>
+                         <div class="text-xs font-black uppercase tracking-widest text-slate-500 bg-slate-800 px-3 py-1 rounded-lg">Soal ${qIdx + 1} / ${GAME_DB.quiz.length}</div>
                     </div>
-                    <div class="glass p-8 rounded-[2rem] text-center mb-8 border-b-4 border-yellow-500">
-                        <h3 class="text-xl font-black">${q.q}</h3>
+                    <div class="glass p-10 rounded-[2rem] text-center mb-8 border-b-4 border-yellow-500 relative">
+                        <div class="absolute -top-5 left-1/2 -translate-x-1/2 w-12 h-12 bg-slate-900 rounded-full border-4 border-yellow-500 flex items-center justify-center text-yellow-500 font-black text-xl">?</div>
+                        <h3 class="text-xl md:text-2xl font-black mt-2 leading-relaxed">${q.q}</h3>
                     </div>
                     <div class="space-y-1">${opts}</div>
                 </div>
@@ -600,11 +800,11 @@
                 state.user.xp += (qScore * 20);
                 storage.save();
                 updateGlobalUI();
-                setTimeout(() => finishGame("QUIZ SELESAI!", prize), 800);
+                setTimeout(() => finishGame("QUIZ SELESAI!", prize, "games"), 800);
             }
         }
 
-        // --- GAME: SCRAMBLE ---
+        // SCRAMBLE
         let sIdx = 0;
         function startScramble() {
             sIdx = 0;
@@ -616,17 +816,26 @@
             const scrambled = item.word.split('').sort(() => Math.random() - 0.5).join('');
             
             document.getElementById('main-content').innerHTML = `
-                <div class="animate-pop text-center">
-                    <h2 class="text-4xl font-black mb-8 gold-text tracking-[0.2em]">${scrambled}</h2>
-                    <div class="glass p-4 rounded-2xl mb-8 flex items-center justify-center gap-2">
-                         <i class="fas fa-lightbulb text-yellow-400"></i>
-                         <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">${item.hint}</p>
+                <div class="animate-pop text-center max-w-lg mx-auto mt-12">
+                    <button onclick="router.navigate('games')" class="mb-8 text-slate-500 hover:text-white flex items-center justify-center gap-2 mx-auto text-xs font-bold uppercase tracking-widest"><i class="fas fa-arrow-left"></i> Kembali</button>
+                    
+                    <h2 class="text-5xl md:text-7xl font-black mb-8 gold-text tracking-[0.2em] drop-shadow-lg">${scrambled}</h2>
+                    
+                    <div class="glass p-4 rounded-2xl mb-8 inline-flex items-center gap-3 border border-indigo-500/30">
+                         <i class="fas fa-lightbulb text-yellow-400 animate-pulse"></i>
+                         <p class="text-xs font-bold text-slate-300 uppercase tracking-widest">${item.hint}</p>
                     </div>
-                    <input id="s-input" type="text" class="w-full bg-slate-800 p-5 rounded-3xl text-center font-black text-xl mb-4 focus:outline-none uppercase border-2 border-indigo-500">
-                    <button onclick="checkScramble()" class="w-full py-5 rounded-3xl bg-indigo-600 font-black shadow-lg">JAWAB</button>
+                    
+                    <input id="s-input" type="text" class="w-full bg-slate-800 p-5 rounded-3xl text-center font-black text-xl mb-4 focus:outline-none uppercase border-2 border-indigo-500 shadow-lg shadow-indigo-500/20">
+                    <button onclick="checkScramble()" class="w-full py-5 rounded-3xl bg-indigo-600 hover:bg-indigo-500 font-black shadow-xl transition-all">JAWAB</button>
                 </div>
             `;
             document.getElementById('s-input').focus();
+            
+             // Allow Enter key
+             document.getElementById('s-input').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') checkScramble();
+            });
         }
 
         function checkScramble() {
@@ -637,64 +846,93 @@
                 showToast("Sempurna!", "success");
                 sIdx++;
                 if(sIdx < GAME_DB.scramble.length) setTimeout(renderScramble, 800);
-                else finishGame("SCRAMBLE SELESAI", 100);
+                else finishGame("SCRAMBLE SELESAI", 100, "games");
             } else {
                 showToast("Salah!", "error");
+                document.getElementById('s-input').classList.add('animate-shake');
+                setTimeout(() => document.getElementById('s-input').classList.remove('animate-shake'), 400);
             }
             storage.save();
             updateGlobalUI();
         }
 
-        function finishGame(title, bonus) {
+        function finishGame(title, bonus, backTo) {
             document.getElementById('main-content').innerHTML = `
-                <div class="animate-pop text-center py-10">
-                    <div class="text-8xl mb-6">🏆</div>
-                    <h2 class="text-4xl font-black mb-2">${title}</h2>
-                    <p class="text-slate-400 mb-8 font-bold">Total Koin Didapat: <span class="text-yellow-400">+${bonus}</span></p>
+                <div class="animate-pop text-center py-10 max-w-md mx-auto">
+                    <div class="text-8xl mb-6 animate-bounce">🏆</div>
+                    <h2 class="text-3xl font-black mb-2 text-white">${title}</h2>
+                    <p class="text-slate-400 mb-8 font-bold">Total Koin Didapat: <span class="text-yellow-400 text-xl block mt-2">+${bonus}</span></p>
                     
                     <div class="space-y-3">
-                        <button onclick="router.navigate('games')" class="w-full py-5 gold-gradient text-slate-900 font-black rounded-3xl shadow-xl">LANJUTKAN</button>
-                        <button onclick="router.navigate('home')" class="w-full py-4 bg-slate-800 font-black rounded-3xl">KE BERANDA</button>
+                        <button onclick="router.navigate('${backTo}')" class="w-full py-5 gold-gradient text-slate-900 font-black rounded-3xl shadow-xl hover:scale-105 transition-transform">MAIN LAGI</button>
+                        <button onclick="router.navigate('home')" class="w-full py-4 bg-slate-800 hover:bg-slate-700 font-black rounded-3xl transition-colors">KE DASHBOARD</button>
                     </div>
                 </div>
             `;
         }
 
         // --- Init ---
-        window.onload = () => {
-            storage.load();
-            router.navigate('home');
-        };
+        window.addEventListener('load', () => {
+            // Setup Splash
+            const splash = document.getElementById("splash");
+            const bar = document.getElementById("splash-progress");
+            const text = document.getElementById("splash-text");
+            let progress = 0;
+
+            const loading = setInterval(() => {
+                progress += Math.floor(Math.random() * 8) + 4;
+                if (progress >= 100) progress = 100;
+                bar.style.width = progress + "%";
+                text.innerText = "LOADING SYSTEM " + progress + "%";
+
+                if (progress === 100) {
+                    clearInterval(loading);
+                    setTimeout(() => splash.classList.add("opacity-0"), 300);
+                    setTimeout(() => {
+                        splash.style.display = "none";
+                        storage.load();
+                        router.navigate('home');
+                    }, 900);
+                }
+            }, 80);
+        });
     </script>
 
+<script src="cinephile-core.js"></script>
+
+<div class="max-w-4xl mx-auto p-6 space-y-6">
+
+  <!-- XP HUD -->
+  <div class="glass rounded-xl p-4">
+    <div class="flex justify-between text-sm font-bold">
+      <span id="cineLevel">LV 1</span>
+      <span>CINEPHILE XP</span>
+    </div>
+    <div class="w-full h-2 bg-slate-700 rounded-full mt-2">
+      <div id="cineXP" class="h-full bg-yellow-400 rounded-full"></div>
+    </div>
+  </div>
+
+  <!-- GAME ROUTER -->
+  <div class="grid md:grid-cols-3 gap-4">
+    <button onclick="Cinephile.route('shooting-simulator-v2.html')"
+      class="glass p-6 rounded-xl hover:scale-105 transition">
+      🎬 Shooting Simulator
+    </button>
+
+    <button class="glass p-6 rounded-xl opacity-50">
+      ✂️ Editing Simulator (Soon)
+    </button>
+
+    <button class="glass p-6 rounded-xl opacity-50">
+      🎧 Sound Design (Soon)
+    </button>
+  </div>
+
+</div>
+
 <script>
-    window.addEventListener("load", () => {
-        const splash = document.getElementById("splash");
-        const bar = document.getElementById("splash-progress");
-        const text = document.getElementById("splash-text");
-
-        let progress = 0;
-
-        const loading = setInterval(() => {
-            progress += Math.floor(Math.random() * 8) + 4; // naik natural
-            if (progress >= 100) progress = 100;
-
-            bar.style.width = progress + "%";
-            text.innerText = "LOADING " + progress + "%";
-
-            if (progress === 100) {
-                clearInterval(loading);
-
-                setTimeout(() => {
-                    splash.classList.add("opacity-0");
-                }, 300);
-
-                setTimeout(() => {
-                    splash.style.display = "none";
-                }, 900);
-            }
-        }, 120);
-    });
+Cinephile.updateHUD();
 </script>
 </body>
 </html>

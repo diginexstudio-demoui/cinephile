@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shooting Simulator V2 — Cinephile</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="cinephile-core.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;900&display=swap');
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: radial-gradient(circle at top, #0f172a, #020617);
+  color: #e5e7eb;
+  overflow: hidden;
+}
+
+.glass {
+  background: rgba(15,23,42,.75);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,.08);
+}
+
+@keyframes shake {
+  0%{transform:translateX(0)}
+  25%{transform:translateX(-10px)}
+  50%{transform:translateX(10px)}
+  75%{transform:translateX(-10px)}
+}
+.shake { animation: shake .3s; }
+
+@keyframes pop {
+  from{transform:scale(.9);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+.animate-pop { animation: pop .3s ease-out; }
+
+.stat-up { color:#22c55e; animation: pop .3s }
+.stat-down { color:#ef4444; animation: pop .3s }
+
+.rec {
+  animation: pulse 1s infinite;
+}
+@keyframes pulse {
+  0%,100%{opacity:1}
+  50%{opacity:.4}
+}
+</style>
+</head>
+
+<script src="cinephile-core.js"></script>
+<body class="w-screen h-screen flex items-center justify-center p-4">
+
+<div id="app" class="w-full max-w-5xl h-[90vh] glass rounded-3xl p-6 md:p-10 flex flex-col relative">
+
+  <!-- REC OVERLAY -->
+  <div class="absolute top-4 right-6 flex items-center gap-2 text-red-500 font-black text-sm">
+    <div class="w-3 h-3 bg-red-500 rounded-full rec"></div> REC
+  </div>
+
+  <!-- HEADER -->
+  <div class="flex justify-between items-center mb-4">
+    <h1 class="text-2xl md:text-3xl font-black text-yellow-400 tracking-wide">
+      SHOOTING SIMULATOR
+    </h1>
+    <span id="phase" class="px-4 py-1 rounded-full bg-yellow-500/20 text-yellow-400 text-xs font-bold">
+      PRA PRODUKSI
+    </span>
+  </div>
+
+  <!-- STATS -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 text-center">
+    <div class="glass rounded-xl p-3">
+      <div class="text-xs text-slate-400">Budget</div>
+      <div id="budget" class="font-black text-yellow-400">$50K</div>
+    </div>
+    <div class="glass rounded-xl p-3">
+      <div class="text-xs text-slate-400">Hari</div>
+      <div id="day" class="font-black">1 / 5</div>
+    </div>
+    <div class="glass rounded-xl p-3">
+      <div class="text-xs text-slate-400">Kualitas</div>
+      <div id="quality" class="font-black">50%</div>
+    </div>
+    <div class="glass rounded-xl p-3">
+      <div class="text-xs text-slate-400">Stress</div>
+      <div id="stress" class="font-black text-rose-400">10%</div>
+    </div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="mb-4">
+    <div class="w-full h-3 bg-slate-800 rounded-full overflow-hidden">
+      <div id="timeline" class="h-full bg-yellow-400 transition-all duration-700" style="width:0%"></div>
+    </div>
+    <p class="text-xs text-slate-400 mt-1">Hari shooting berjalan...</p>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="content" class="flex-1 flex items-center justify-center text-center"></div>
+
+</div>
+
+<script>
+let dayInterval = null;
+
+let state = {
+  phase: "pra",
+  day: 1,
+  maxDay: 5,
+
+  budget: 50,
+  quality: 50,
+  stress: 15,
+
+  progress: 0,
+  timeLeft: 60, // detik per hari
+  difficulty: 1,
+
+  running: false,
+  eventToday: false,
+};
+
+const content = document.getElementById("content");
+const timeline = document.getElementById("timeline");
+
+function updateUI(){
+  budget.innerText = "$" + state.budget + "K";
+  day.innerText = state.day + " / " + state.maxDay;
+  quality.innerText = state.quality + "%";
+  stress.innerText = state.stress + "%";
+}
+
+function startPra(){
+  phase.innerText = "PRA PRODUKSI";
+  content.innerHTML = `
+    <div class="animate-pop space-y-4">
+      <h2 class="text-2xl font-black">Pilih Pendekatan Film</h2>
+      <div class="grid md:grid-cols-3 gap-4">
+        <button onclick="pick('drama')" class="glass p-5 rounded-xl hover:scale-105 transition">
+          🎭 Drama<br><span class="text-xs text-slate-400">Story kuat</span>
+        </button>
+        <button onclick="pick('horror')" class="glass p-5 rounded-xl hover:scale-105 transition">
+          👻 Horror<br><span class="text-xs text-slate-400">Tekanan tinggi</span>
+        </button>
+        <button onclick="pick('action')" class="glass p-5 rounded-xl hover:scale-105 transition">
+          💥 Action<br><span class="text-xs text-slate-400">Budget berat</span>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function pick(type){
+  if(type==="action") state.budget-=15;
+  if(type==="drama") state.quality+=10;
+  state.phase="shoot";
+  phase.innerText="PRODUKSI";
+  startDay();
+}
+
+const EVENTS = [
+  {
+    text:"🎭 Aktor lupa dialog!",
+    options:[
+      {t:"Ulang Take",q:+10,s:+10,p:-15},
+      {t:"Improvisasi",q:-5,s:+5,p:-5}
+    ]
+  },
+  {
+    text:"🌧️ Hujan deras!",
+    options:[
+      {t:"Tunggu",q:0,s:+10,p:-20},
+      {t:"Pindah Lokasi",q:-5,s:+5,p:-10}
+    ]
+  },
+  {
+    text:"🎥 Kamera overheat!",
+    options:[
+      {t:"Istirahat",q:0,s:-5,p:-10},
+      {t:"Push Terus",q:-10,s:+15,p:-5}
+    ]
+  }
+];
+
+function startDay(){
+  state.eventToday = false;
+  state.progress = 0;
+  state.timeLeft = 60 - (state.day * 5); // makin hari makin sempit
+  state.running = true;
+
+  phase.innerText = "PRODUKSI — DAY " + state.day;
+
+  content.innerHTML = `
+    <div class="space-y-3 text-center">
+      <h2 class="text-2xl font-black">🎬 Shooting Day ${state.day}</h2>
+      <p class="text-slate-400">Time Pressure Active</p>
+      <p id="timer" class="text-red-400 font-black text-xl">${state.timeLeft}s</p>
+    </div>
+  `;
+
+if (dayInterval) clearInterval(dayInterval);
+
+dayInterval = setInterval(() => {
+  if (!state.running) return;
+
+  state.timeLeft--;
+  const timerEl = document.getElementById("timer");
+  if (timerEl) timerEl.innerText = state.timeLeft + "s";
+
+  let speed = 6 - (state.stress / 25);
+  if (speed < 1) speed = 1;
+
+  state.progress += speed;
+  if (state.progress > 100) state.progress = 100;
+  timeline.style.width = state.progress + "%";
+
+  // EVENT TIDAK BOLEH DI AKHIR
+  if (
+    !state.eventToday &&
+    state.progress > 25 &&
+    state.progress < 85 &&
+    Math.random() < (state.stress / 140)
+  ) {
+    state.eventToday = true;
+    triggerHardcoreEvent();
+  }
+
+  if (state.timeLeft <= 0 && state.progress < 100) {
+    clearInterval(dayInterval);
+    state.running = false;
+    failDay();
+    return;
+  }
+
+  if (state.progress >= 100) {
+    clearInterval(dayInterval);
+    state.running = false;
+
+    state.day++;
+    state.stress += 5;
+    updateUI();
+
+    if (state.day > state.maxDay) finishShoot();
+    else setTimeout(startDay, 1000);
+  }
+
+}, 1000);
+}
+
+const HARDCORE_EVENTS = [
+  {
+    text: "🎭 Aktor utama breakdown mental",
+    options: [
+      { t: "Push terus", q:-10, s:+20, time:-10 },
+      { t: "Cut scene penting", q:-15, s:+5, time:0 }
+    ]
+  },
+  {
+    text: "⚡ Listrik lokasi mati",
+    options: [
+      { t: "Sewa genset", q:0, s:+10, time:-5, cost:5 },
+      { t: "Delay", q:-10, s:+15, time:-15 }
+    ]
+  },
+  {
+    text: "🎥 Shot terlihat flat",
+    options: [
+      { t: "Ambil ulang", q:+10, s:+10, time:-10 },
+      { t: "Fix di post", q:-5, s:+5, time:0 }
+    ]
+  }
+];
+function triggerHardcoreEvent(){
+  state.running = false;
+  document.body.classList.add("shake");
+
+  const e = HARDCORE_EVENTS[Math.floor(Math.random() * HARDCORE_EVENTS.length)];
+
+  content.innerHTML = `
+    <div class="glass p-6 rounded-2xl animate-pop max-w-md text-center">
+      <h2 class="text-xl font-black mb-4">${e.text}</h2>
+      <div class="space-y-2">
+        ${e.options.map(o => `
+          <button onclick="resolveHardcore(${o.q},${o.s},${o.time || 0},${o.cost || 0})"
+            class="w-full glass p-3 rounded-xl hover:scale-105 transition">
+            ${o.t}
+          </button>
+        `).join("")}
+      </div>
+    </div>
+  `;
+
+  setTimeout(()=>document.body.classList.remove("shake"),300);
+}
+
+
+function resolveHardcore(q,s,time,cost){
+  state.quality = Math.max(0, state.quality + q);
+  state.stress = Math.min(100, state.stress + s);
+  state.timeLeft += time;
+  state.budget -= cost;
+
+  state.running = true; // 🔥 PENTING
+  updateUI();
+}
+
+function failDay(){
+  state.stress = Math.min(100, state.stress + 15);
+  state.quality = Math.max(0, state.quality - 10);
+
+  content.innerHTML = `
+    <div class="animate-pop text-center space-y-4">
+      <div class="text-5xl">💀</div>
+      <h2 class="text-2xl font-black">DAY FAILED</h2>
+      <p class="text-slate-400">Tekanan terlalu tinggi</p>
+      <button onclick="resumeAfterFail()"
+        class="px-6 py-3 bg-red-500 text-black font-black rounded-xl">
+        LANJUT HARI BERIKUTNYA
+      </button>
+    </div>
+  `;
+}
+
+function resumeAfterFail(){
+  state.day++;
+  state.running = true;
+  startDay();
+}
+
+function finishShoot(){
+  let points = 1;
+  let xp = 5;
+  let ending = "💀 Film Gagal Total";
+
+  if (state.quality >= 85 && state.stress < 60) {
+    ending = "🏆 MASTERPIECE";
+    points = 70;
+    xp = 120;
+  } 
+  else if (state.quality >= 70) {
+    ending = "🎬 Film Bagus";
+    points = 50;
+    xp = 80;
+  }
+  else if (state.quality >= 55) {
+    ending = "👍 Film Cukup Layak";
+    points = 20;
+    xp = 40;
+  }
+  else {
+    ending = "💀 Film Jelek";
+    points = Math.floor(Math.random() * 5) + 1; // 1–5
+    xp = 10;
+  }
+
+  // 🔥 INI KUNCINYA
+  Cinephile.addReward(points, xp, "Shooting Simulator");
+
+  content.innerHTML = `
+    <div class="animate-pop text-center space-y-4">
+      <h2 class="text-3xl font-black">${ending}</h2>
+      <p class="text-slate-400">
+        Quality: ${state.quality}%<br>
+        Stress: ${state.stress}%<br>
+        <span class="text-yellow-400 font-black">+${points} Poin</span><br>
+        +${xp} XP
+      </p>
+      <button onclick="Cinephile.route('index.html')"
+        class="px-6 py-3 bg-yellow-400 text-black font-black rounded-xl">
+        KEMBALI KE HUB
+      </button>
+    </div>
+  `;
+}
+
+updateUI();
+startPra();
+</script>
+
+</body>
+</html>
